@@ -11,5 +11,8 @@ module.exports = {
         'views': '@/views',
       }
     }
-  }
+  },
+  // devServer: {
+  //   host: '192.168.0.235'
+  // }
 }
