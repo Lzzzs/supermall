@@ -26,10 +26,15 @@
     },
     methods: {
       scrollTop(x,y,time=500) {
-        this.scroll.scrollTo(x,y,time)
+        this.scroll && this.scroll.scrollTo(x,y,time)
       },
       refresh() {
-        this.scroll.refresh()
+        console.log('refresh函数被执行')
+        this.scroll && this.scroll.refresh()
+      },
+      getSavaY() {
+        return this.scroll ? this.scroll.y : 0
+        // console.log(this.scroll.y)
       }
     },
     mounted() {
@@ -38,16 +43,22 @@
         click: true,
         pullUpLoad: this.pullUpLoad
       })
-      this.scroll.on('scroll', (position) => {
-        // 将position传入父组件
-        this.$emit('Position',position)
-      })
-      this.scroll.on('pullingUp', () => {
-        this.$emit('load')
-        setTimeout(() => {
-          this.scroll.finishPullUp()
-        },2000)
-      })
+
+      if(this.probeType == 2 || this.probeType == 3){
+        this.scroll.on('scroll', (position) => {
+          // 将position传入父组件
+          this.$emit('Position',position)
+        })
+      }
+
+      if(this.pullUpLoad) {
+        this.scroll.on('pullingUp', () => {
+          this.$emit('load')
+          setTimeout(() => {
+            this.scroll.finishPullUp()
+          },2000)
+        })
+      }
     }
   }
 </script>

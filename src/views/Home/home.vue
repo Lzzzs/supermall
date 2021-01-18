@@ -3,15 +3,16 @@
     <nav-bar class="home-nav">
       <div slot="center">ktt的商城</div>
     </nav-bar>
+    <tab-control :titles = "['流行','新款','精选']" @tabClick=tabClick ref="tabControl2" class="tabControl" v-show="isFixed" />
     <scroll class="content" 
     ref="scroll" :probe-type=3 
     @Position=backTopPosition 
     @load="load"
     :pullUpLoad=true>
-      <home-swiper :banner = banner></home-swiper>
+      <home-swiper :banner = banner @loadSwiperImgage="loadSwiperImgage"></home-swiper>
       <recommend :recommends = recommend></recommend>
       <feature />
-      <tab-control :titles = "['流行','新款','精选']" @tabClick=tabClick></tab-control>
+      <tab-control :titles = "['流行','新款','精选']" @tabClick=tabClick ref="tabControl1" />
       <goods-list :goods = showGoods></goods-list>
     </scroll>
     <back-top @click.native="backTop" v-show="isShowBackTop"/>
@@ -30,6 +31,7 @@ import Recommend from './childcomps/Recommend'
 import Feature from './childcomps/Feature'
 
 import {getHomemMultidata,getHomeGoods} from 'network/home.js'
+import { debounce } from 'common/utils.js'
 
   export default {
     data() {
@@ -42,7 +44,10 @@ import {getHomemMultidata,getHomeGoods} from 'network/home.js'
           'sell': {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: false
+        isShowBackTop: false,
+        TabControlOffsetTop: 0,
+        isFixed: false,
+        saveY: 0
       }
     },
     computed: {
@@ -67,10 +72,23 @@ import {getHomemMultidata,getHomeGoods} from 'network/home.js'
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
+    },
+    mounted() {
+      const refresh =  debounce(this.$refs.scroll.refresh, 100)
       // 监听图片加载
       this.$bus.$on('itemImgLoad', () => {
-        this.$refs.scroll.refresh()
+       refresh()
       })
+    },
+    activated() {
+      //将位置移动至上一次离开的位置
+      this.$refs.scroll.scroll.scrollTo(0,this.saveY,0)
+      //执行刷新操作,把位置刷新一次
+      this.$refs.scroll.refresh()
+    },
+    deactivated() {
+      // 离开home保存位置
+      this.saveY = this.$refs.scroll.getSavaY()
     },
     methods: {
       /*
@@ -87,6 +105,8 @@ import {getHomemMultidata,getHomeGoods} from 'network/home.js'
           case 2:
             this.currentType = "sell";
         }
+        this.$refs.tabControl1.currentIndex = index
+        this.$refs.tabControl2.currentIndex = index
       },
       backTop() {
         // 获取子组件对象调用方法
@@ -95,9 +115,16 @@ import {getHomemMultidata,getHomeGoods} from 'network/home.js'
       backTopPosition(position) {
         //在y轴滚动超过1000则显示向上箭头
         this.isShowBackTop = (-position.y) > 1000
+
+        //判断是否吸顶
+        this.isFixed = (-position.y) >  this.TabControlOffsetTop
       },
       load() {
         this.getHomeGoods(this.currentType)
+      },
+      loadSwiperImgage() {
+        //获取tabControl的offsetTop
+        this.TabControlOffsetTop = this.$refs.tabControl1.$el.offsetTop
       },
        /*
       * 网络请求的方法
@@ -142,5 +169,9 @@ import {getHomemMultidata,getHomeGoods} from 'network/home.js'
     bottom: 49px;
     left: 0px;
     right: 0px;
+  }
+  .tabControl {
+    position: relative;
+    z-index: 9;
   }
 </style>

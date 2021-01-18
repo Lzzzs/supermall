@@ -1,5 +1,5 @@
 <template>
-  <div id="tab-control">
+  <div id="tab-control" class="{fixed: isFixed}">
     <div v-for="(item,index) in titles" class="tab-control-item"
      :class="{active: index == currentIndex}"
      @click="itemClick(index)" :key="index">
@@ -28,7 +28,7 @@
         this.currentIndex = index
         // 给父组件传数据
         this.$emit('tabClick',index)
-      }
+      },
     }
   }
 </script>
@@ -41,9 +41,6 @@
     height: 40px;
     line-height: 40px;
     z-index: 9;
-    /* 监听滑动滚动边fixed */
-    position: sticky;
-    top: 43px;
     background-color: #ffffff;
   }
   .tab-control-item {
