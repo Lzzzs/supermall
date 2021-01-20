@@ -8,6 +8,7 @@ const home = () => import('../views/Home/home')
 const category = () => import('../views/Category/category')
 const cart = () => import('../views/Cart/cart')
 const profile = () => import('../views/Profile/profile')
+const detail = () => import('../views/Detail/detail')
 
 const routes = [
   {
@@ -30,6 +31,10 @@ const routes = [
     path: '/profile',
     component: profile
   },
+  {
+    path: '/detail',
+    component: detail
+  }
 ]
 
 const router = new VueRouter({
