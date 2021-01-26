@@ -1,6 +1,6 @@
 <template>
   <div class="goods-item" @click="itemClick">
-    <img :src="goodsItem.show.img" @load="imgLoad">
+    <img :src="showImages" @load="imgLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -17,6 +17,19 @@
         default() {
           return {}
         }
+      }
+    },
+    computed: {
+      showImages() {
+        /*
+        this.goodsItem.image必须得放前面  
+        因为如果this.goodsItem.show.img放前面 
+        show假如读不到 就会是undefine 那么
+        再去读img就会报错 所以 this.goodsItem.image
+        必须放前面
+        */
+        return this.goodsItem.image || this.goodsItem.show.img
+        // return this.goodsItem.show.img || this.goodsItem.image
       }
     },
     methods: {

@@ -4,7 +4,7 @@
     </goods-list-item>
   </div>
 </template>
-
+ 
 <script>
 import GoodsListItem from './GoodsListItem'
   export default {

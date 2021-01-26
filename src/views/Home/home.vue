@@ -24,14 +24,13 @@ import NavBar from 'components/common/navbar/NavBar'
 import TabControl from 'components/content/tabControl/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/content/backTop/BackTop'
 
 import HomeSwiper from './childcomps/HomeSwiper'
 import Recommend from './childcomps/Recommend'
 import Feature from './childcomps/Feature'
 
 import {getHomemMultidata,getHomeGoods} from 'network/home.js'
-import { debounce } from 'common/utils.js'
+import {itemListenMixin, backTop} from 'common/mixin.js'
 
   export default {
     data() {
@@ -44,7 +43,6 @@ import { debounce } from 'common/utils.js'
           'sell': {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: false,
         TabControlOffsetTop: 0,
         isFixed: false,
         saveY: 0
@@ -60,11 +58,11 @@ import { debounce } from 'common/utils.js'
       TabControl,
       GoodsList,
       Scroll,
-      BackTop,
       HomeSwiper,
       Recommend,
       Feature
     },
+    mixins: [itemListenMixin, backTop],
     created() {
       // 请求页面布局数据
       this.getHomemMultidata()
@@ -72,13 +70,6 @@ import { debounce } from 'common/utils.js'
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
-    },
-    mounted() {
-      const refresh =  debounce(this.$refs.scroll.refresh, 100)
-      // 监听图片加载
-      this.$bus.$on('itemImgLoad', () => {
-       refresh()
-      })
     },
     activated() {
       //将位置移动至上一次离开的位置
@@ -89,6 +80,9 @@ import { debounce } from 'common/utils.js'
     deactivated() {
       // 离开home保存位置
       this.saveY = this.$refs.scroll.getSavaY()
+      //离开home将事件总线的home里的事件取消掉
+      this.$bus.$off('itemImgLoad', this.itemImgLoadListen)
+      // console.log('全局事件取消')
     },
     methods: {
       /*
@@ -108,13 +102,9 @@ import { debounce } from 'common/utils.js'
         this.$refs.tabControl1.currentIndex = index
         this.$refs.tabControl2.currentIndex = index
       },
-      backTop() {
-        // 获取子组件对象调用方法
-        this.$refs.scroll.scrollTop(0,0)
-      },
       backTopPosition(position) {
         //在y轴滚动超过1000则显示向上箭头
-        this.isShowBackTop = (-position.y) > 1000
+        this.showBackTop(position)
 
         //判断是否吸顶
         this.isFixed = (-position.y) >  this.TabControlOffsetTop
